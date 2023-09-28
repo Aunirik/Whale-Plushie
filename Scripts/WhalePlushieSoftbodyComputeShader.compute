@@ -1,0 +1,26 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWStructuredBuffer<float3> VertexBuffer;
+RWStructuredBuffer<float3> SoftbodyVertexBuffer;
+RWStructuredBuffer<float3> SoftbodyDisplacementBuffer;
+RWStructuredBuffer<float3> DeformedVertexBuffer;
+float DeformationFactor;
+int VertexCount;
+int SoftbodyVertexCount;
+
+[numthreads(16, 1, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    if ((int)id.x >= VertexCount)
+        return;
+
+    for (int i = 0; i < SoftbodyVertexCount; i++)
+    {
+        float3 offset = VertexBuffer[id.x] - SoftbodyVertexBuffer[i] - SoftbodyDisplacementBuffer[i];
+        float3 localDisplacement = dot(SoftbodyDisplacementBuffer[i], offset) * SoftbodyDisplacementBuffer[i];
+        DeformedVertexBuffer[id.x] += localDisplacement / (1.0 + pow(dot(offset, offset), DeformationFactor));
+    }
+}
