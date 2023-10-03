@@ -19,6 +19,7 @@ namespace Aunirik.WhalePlushie
         public float deformationLimit;
 
         private Transform softbodyTransform;
+        private Rigidbody _rigidbody;
 
         private Mesh mesh;
         private int meshVertexCount;
@@ -54,6 +55,7 @@ namespace Aunirik.WhalePlushie
             MeshFilter meshFilter = GetComponent<MeshFilter>();
 
             this.softbodyTransform = Instantiate(new GameObject("Softbody"), transform).transform;
+            this._rigidbody = GetComponent<Rigidbody>();
 
             this.mesh = Instantiate(meshFilter.sharedMesh);
             this.meshVertexCount = mesh.vertexCount;
@@ -150,12 +152,11 @@ namespace Aunirik.WhalePlushie
 
             for (int i = 0; i < softbodyVertexCount; i++)
             {
-                Vector3 worldVertex = softbodyTransform.TransformPoint(softbodyVertices[i]);
-                softbodyDisplacements[i] = rigidbodies[i].position - worldVertex;
-                deformation += softbodyDisplacements[i];
-                Vector3 springVector = Time.fixedDeltaTime * springForce * -softbodyDisplacements[i].normalized;
+                Vector3 worldVertex = transform.TransformPoint(softbodyVertices[i]);
+                Vector3 displacement = rigidbodies[i].position - worldVertex;
+                Vector3 springVector = Time.fixedDeltaTime * springForce * -displacement.normalized;
 
-                if (springVector.sqrMagnitude > softbodyDisplacements[i].sqrMagnitude)
+                if (springVector.sqrMagnitude > displacement.sqrMagnitude)
                 {
                     rigidbodies[i].MovePosition(worldVertex);
                 }
@@ -163,6 +164,10 @@ namespace Aunirik.WhalePlushie
                 {
                     rigidbodies[i].MovePosition(rigidbodies[i].position + springVector);
                 }
+
+                rigidbodies[i].velocity = _rigidbody.GetPointVelocity(worldVertex);
+                softbodyDisplacements[i] = displacement;
+                deformation += softbodyDisplacements[i];
             }
         }
 
