@@ -8,6 +8,7 @@ RWStructuredBuffer<float3> SoftbodyVertexBuffer;
 RWStructuredBuffer<float3> SoftbodyDisplacementBuffer;
 RWStructuredBuffer<float3> DeformedVertexBuffer;
 float DeformationFactor;
+float DeformationScale;
 int VertexCount;
 int SoftbodyVertexCount;
 
@@ -19,8 +20,9 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 
     for (int i = 0; i < SoftbodyVertexCount; i++)
     {
-        float3 offset = VertexBuffer[id.x] - SoftbodyVertexBuffer[i] - SoftbodyDisplacementBuffer[i];
-        float3 localDisplacement = dot(SoftbodyDisplacementBuffer[i], offset) * SoftbodyDisplacementBuffer[i];
+        float3 displacement = DeformationScale * SoftbodyDisplacementBuffer[i];
+        float3 offset = VertexBuffer[id.x] - SoftbodyVertexBuffer[i] - displacement;
+        float3 localDisplacement = dot(displacement, offset) * displacement;
         DeformedVertexBuffer[id.x] += localDisplacement / (1.0 + pow(dot(offset, offset), DeformationFactor));
     }
 }

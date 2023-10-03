@@ -15,6 +15,8 @@ namespace Aunirik.WhalePlushie
         [Min(0.001f)]
         public float springForce;
         public float deformationFactor;
+        [Min(0f)]
+        public float deformationLimit;
 
         private Transform softbodyTransform;
 
@@ -41,6 +43,7 @@ namespace Aunirik.WhalePlushie
         private static readonly int softbodyDisplacementComputeBufferId = Shader.PropertyToID("SoftbodyDisplacementBuffer");
         private static readonly int deformedVertexComputeBufferId = Shader.PropertyToID("DeformedVertexBuffer");
         private static readonly int deformationFactorId = Shader.PropertyToID("DeformationFactor");
+        private static readonly int deformationScaleId = Shader.PropertyToID("DeformationScale");
         private static readonly int vertexCountId = Shader.PropertyToID("VertexCount");
         private static readonly int softbodyVertexCountId = Shader.PropertyToID("SoftbodyVertexCount");
 
@@ -107,6 +110,7 @@ namespace Aunirik.WhalePlushie
             this.computeShader = Instantiate(deformerComputeShader);
             this.isRequestDispatched = false;
             computeShader.SetFloat(deformationFactorId, deformationFactor);
+            computeShader.SetFloat(deformationScaleId, 1.0f);
             computeShader.SetInt(vertexCountId, meshVertexCount);
             computeShader.SetInt(softbodyVertexCountId, softbodyVertexCount);
         }
@@ -168,6 +172,9 @@ namespace Aunirik.WhalePlushie
                 return;
 
             this.isRequestDispatched = true;
+            float deformationMagnitude = deformation.magnitude;
+            float deformationScale = deformationMagnitude <= deformationLimit ? 1.0f : deformationLimit / deformationMagnitude;
+            computeShader.SetFloat(deformationScaleId, deformationScale);
             softbodyDisplacementComputeBuffer.SetData(softbodyDisplacements);
             deformedVertexComputeBuffer.SetData(meshVertices);
             computeShader.Dispatch(0, Mathf.CeilToInt(meshVertexCount / 16.0f), 1, 1);

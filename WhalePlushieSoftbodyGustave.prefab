@@ -36,6 +36,14 @@ PrefabInstance:
       propertyPath: softbodyMesh
       value: 
       objectReference: {fileID: 4378789262159123611, guid: 43e8733dcc18b49428aca4d1997abbb0, type: 3}
+    - target: {fileID: 7649205984396541516, guid: b6b0ddd9f1e5b424ab923524616eadc5, type: 3}
+      propertyPath: deformationLimit
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7649205984396541516, guid: b6b0ddd9f1e5b424ab923524616eadc5, type: 3}
+      propertyPath: deformationFactor
+      value: 0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 8959545603206901041, guid: b6b0ddd9f1e5b424ab923524616eadc5, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

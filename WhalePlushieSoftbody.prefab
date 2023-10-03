@@ -406,6 +406,7 @@ MonoBehaviour:
   radius: 0.1
   springForce: 0.8
   deformationFactor: 0.2
+  deformationLimit: 2
 --- !u!4 &8959545603206901041 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 9017518880680520473, guid: e6994da4ce3f9c9448d5aeb29bf60477, type: 3}
