@@ -29,6 +29,7 @@ namespace Aunirik.WhalePlushie
         private SphereCollider[] colliders;
         private Rigidbody[] rigidbodies;
 
+        private ComputeShader computeShader;
         private bool isRequestDispatched;
         private ComputeBuffer vertexComputeBuffer;
         private ComputeBuffer softbodyVertexComputeBuffer;
@@ -103,10 +104,11 @@ namespace Aunirik.WhalePlushie
                 rigidbodies[i].isKinematic = false;
             }
 
+            this.computeShader = Instantiate(deformerComputeShader);
             this.isRequestDispatched = false;
-            deformerComputeShader.SetFloat(deformationFactorId, deformationFactor);
-            deformerComputeShader.SetInt(vertexCountId, meshVertexCount);
-            deformerComputeShader.SetInt(softbodyVertexCountId, softbodyVertexCount);
+            computeShader.SetFloat(deformationFactorId, deformationFactor);
+            computeShader.SetInt(vertexCountId, meshVertexCount);
+            computeShader.SetInt(softbodyVertexCountId, softbodyVertexCount);
         }
 
         public void OnEnable()
@@ -119,10 +121,10 @@ namespace Aunirik.WhalePlushie
             vertexComputeBuffer.SetData(meshVertices);
             softbodyVertexComputeBuffer.SetData(softbodyVertices);
 
-            deformerComputeShader.SetBuffer(0, vertexComputeBufferId, vertexComputeBuffer);
-            deformerComputeShader.SetBuffer(0, softbodyVertexComputeBufferId, softbodyVertexComputeBuffer);
-            deformerComputeShader.SetBuffer(0, softbodyDisplacementComputeBufferId, softbodyDisplacementComputeBuffer);
-            deformerComputeShader.SetBuffer(0, deformedVertexComputeBufferId, deformedVertexComputeBuffer);
+            computeShader.SetBuffer(0, vertexComputeBufferId, vertexComputeBuffer);
+            computeShader.SetBuffer(0, softbodyVertexComputeBufferId, softbodyVertexComputeBuffer);
+            computeShader.SetBuffer(0, softbodyDisplacementComputeBufferId, softbodyDisplacementComputeBuffer);
+            computeShader.SetBuffer(0, deformedVertexComputeBufferId, deformedVertexComputeBuffer);
         }
 
         public void OnDisable()
@@ -168,7 +170,7 @@ namespace Aunirik.WhalePlushie
             this.isRequestDispatched = true;
             softbodyDisplacementComputeBuffer.SetData(softbodyDisplacements);
             deformedVertexComputeBuffer.SetData(meshVertices);
-            deformerComputeShader.Dispatch(0, Mathf.CeilToInt(meshVertexCount / 16.0f), 1, 1);
+            computeShader.Dispatch(0, Mathf.CeilToInt(meshVertexCount / 16.0f), 1, 1);
             this.request = AsyncGPUReadback.Request(deformedVertexComputeBuffer);
         }
 
@@ -196,10 +198,10 @@ namespace Aunirik.WhalePlushie
                 colliders[i].radius = radius;
             }
 
-            if (deformerComputeShader == null)
+            if (computeShader == null)
                 return;
 
-            deformerComputeShader.SetFloat(deformationFactorId, deformationFactor);
+            computeShader.SetFloat(deformationFactorId, deformationFactor);
         }
     }
 }
